@@ -431,9 +431,10 @@ def applications_stats():
         "rejected": 0
     }
 
+# Initialize database when the module is imported
+with app.app_context():
+    db.create_all()
+    import_jobs_from_csv()
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        import_jobs_from_csv()
-    
     app.run(debug=False)
