@@ -8,6 +8,6 @@
   },
   "env": {
     "FLASK_ENV": "production",
-    "SECRET_KEY": "@your-secure-key-here-change-this-in-production@"
+   "SECRET_KEY": "Samhitha_AI_Job_Matching_2026"
   }
 }
