@@ -1,0 +1,15 @@
+{
+  "buildCommand": "pip install -r requirements.txt",
+  "framework": "flask",
+  "outputDirectory": ".",
+  "public": "static",
+  "env": {
+    "FLASK_ENV": "production",
+    "SECRET_KEY": "@your-secure-key-here-change-this-in-production@"
+  },
+  "functions": {
+    "api/app.py": {
+      "runtime": "python3.11"
+    }
+  }
+}

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Job Matching Engine</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fa-solid fa-robot"></i> AI Job Match
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('saved_jobs') }}"><i class="fa-solid fa-bookmark"></i> Saved Jobs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('my_applications') }}"><i class="fa-solid fa-file-lines"></i> Applications</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}"><i class="fa-solid fa-user-circle"></i> {{ current_user.full_name }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}"><i class="fa-solid fa-sign-out-alt"></i> Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="fa-solid fa-sign-in-alt"></i> Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}"><i class="fa-solid fa-user-plus"></i> Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="badge">AI Powered Recruitment</div>
+                    <h1>Find Your Dream Job with <span>AI</span></h1>
+                    <p class="hero-text">
+                        Enter your skills and discover jobs that truly match your profile.
+                    </p>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="glass-card form-card">
+                        <h3 class="mb-3"><i class="fa-solid fa-user"></i> Tell Us About Yourself</h3>
+
+                        <form id="matchForm" method="post" action="{{ url_for('match_jobs') }}">
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fa-solid fa-briefcase"></i> Desired Job Role</label>
+                                <input type="text" name="role" class="form-control" placeholder="e.g. Data Scientist" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fa-solid fa-laptop-code"></i> Skills</label>
+                                <textarea name="skills" class="form-control" rows="4" placeholder="e.g. Python, Machine Learning, SQL"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa-solid fa-magnifying-glass"></i> Find Matching Jobs
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="jobs" class="section">
+        <div class="container">
+            {% if summary %}
+            <div class="dashboard-grid mb-4">
+                <div class="glass-card summary-card">
+                    <h5><i class="fa-solid fa-briefcase"></i> Jobs Found</h5>
+                    <h2>{{ summary.jobs_found }}</h2>
+                </div>
+                <div class="glass-card summary-card">
+                    <h5><i class="fa-solid fa-trophy"></i> Highest Match</h5>
+                    <h2>{{ summary.highest_match }}%</h2>
+                </div>
+                <div class="glass-card summary-card">
+                    <h5><i class="fa-solid fa-code"></i> Skills Entered</h5>
+                    <h2>{{ summary.skills_entered }}</h2>
+                </div>
+                <div class="glass-card summary-card">
+                    <h5><i class="fa-solid fa-star"></i> Recommended</h5>
+                    <h2>{{ summary.recommended }}</h2>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="section-heading">
+                <h2>Recommended Jobs</h2>
+                <p>AI-ranked opportunities tailored for you.</p>
+            </div>
+
+            {% if jobs %}
+            <div class="job-grid">
+                {% for job in jobs %}
+                <div class="glass-card job-card" data-categories="{{ ','.join(job.categories) }}" data-job-id="{{ job.id }}">
+                    <div class="job-top">
+                        <div class="job-icon">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <div>
+                            <h4>{{ job.title }}</h4>
+                            <p class="company">{{ job.company }}</p>
+                        </div>
+                        {% if current_user.is_authenticated %}
+                        <button class="btn btn-sm btn-outline-light save-job-btn" data-job-id="{{ job.id }}" title="Save Job">
+                            <i class="fa-solid fa-bookmark"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="meta-row">
+                        <span><i class="fa-solid fa-location-dot"></i> {{ job.location }}</span>
+                        <span><i class="fa-solid fa-indian-rupee-sign"></i> {{ job.salary }}</span>
+                    </div>
+
+                    <div class="match-block">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="match-label"><i class="fa-solid fa-target"></i> Match Score</span>
+                            <strong>{{ job.match_score }}%</strong>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ job.match_score }}%;"></div>
+                        </div>
+                    </div>
+
+                    <p class="job-description">{{ job.description }}</p>
+
+                    <div class="chip-row">
+                        {% for tag in job.categories %}
+                        <span class="chip">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <button class="btn btn-apply w-100" data-job-title="{{ job.title }}" data-job-company="{{ job.company }}" data-job-id="{{ job.id }}">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="glass-card empty-state">
+                <h3>No matching jobs found yet.</h3>
+                <p>Try different skill keywords or a broader role title.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Application Modal -->
+    <div class="modal fade" id="applicationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fa-solid fa-file-lines"></i> Apply for Position</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" class="form-control" id="modalJobTitle" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Company</label>
+                        <input type="text" class="form-control" id="modalJobCompany" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa-solid fa-user"></i> Full Name</label>
+                        <input type="text" class="form-control" id="applicantName" placeholder="Your full name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa-solid fa-envelope"></i> Email</label>
+                        <input type="email" class="form-control" id="applicantEmail" placeholder="your.email@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa-solid fa-phone"></i> Phone</label>
+                        <input type="tel" class="form-control" id="applicantPhone" placeholder="+91 9876543210" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa-solid fa-file-pdf"></i> Upload Resume</label>
+                        <input type="file" class="form-control" id="applicantResume" accept=".pdf,.doc,.docx">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa-solid fa-message"></i> Cover Letter</label>
+                        <textarea class="form-control" id="applicantCoverLetter" rows="3" placeholder="Tell us why you're a great fit..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitApplication">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Application
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const applyButtons = document.querySelectorAll(".btn-apply");
+            const applicationModal = new bootstrap.Modal(document.getElementById("applicationModal"));
+            const submitBtn = document.getElementById("submitApplication");
+
+            applyButtons.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const jobTitle = btn.getAttribute("data-job-title");
+                    const jobCompany = btn.getAttribute("data-job-company");
+                    const jobId = btn.getAttribute("data-job-id");
+                    
+                    document.getElementById("modalJobTitle").value = jobTitle;
+                    document.getElementById("modalJobCompany").value = jobCompany;
+                    document.getElementById("submitApplication").setAttribute("data-job-id", jobId);
+                    
+                    applicationModal.show();
+                });
+            });
+
+            submitBtn.addEventListener("click", () => {
+                const name = document.getElementById("applicantName").value;
+                const email = document.getElementById("applicantEmail").value;
+                const phone = document.getElementById("applicantPhone").value;
+                const jobId = submitBtn.getAttribute("data-job-id");
+
+                if (!name || !email || !phone) {
+                    alert("❌ Please fill all required fields!");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('job_id', jobId);
+                formData.append('full_name', name);
+                formData.append('email', email);
+                formData.append('phone', phone);
+                formData.append('cover_letter', document.getElementById("applicantCoverLetter").value);
+                
+                const resumeFile = document.getElementById("applicantResume").files[0];
+                if (resumeFile) {
+                    formData.append('resume', resumeFile);
+                }
+
+                fetch('/apply', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`✅ ${data.message}`);
+                        applicationModal.hide();
+                        document.getElementById("applicantName").value = "";
+                        document.getElementById("applicantEmail").value = "";
+                        document.getElementById("applicantPhone").value = "";
+                        document.getElementById("applicantResume").value = "";
+                        document.getElementById("applicantCoverLetter").value = "";
+                    } else {
+                        alert(`❌ ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ Error submitting application!');
+                });
+            });
+
+            // Save job functionality
+            const saveJobBtns = document.querySelectorAll(".save-job-btn");
+            saveJobBtns.forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const jobId = btn.getAttribute("data-job-id");
+                    
+                    fetch(`/save-job/${jobId}`, { method: "POST" })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "saved") {
+                                btn.classList.add("active");
+                                alert("✅ Job saved to favorites!");
+                            } else if (data.status === "removed") {
+                                btn.classList.remove("active");
+                                alert("❌ Job removed from favorites!");
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+Job_Title,Company,Location,Salary,Description
+AI Engineer,Google,Hyderabad,"₹18-24 LPA","Python TensorFlow PyTorch Deep Learning Computer Vision NLP"
+Data Scientist,Microsoft,Bangalore,"₹15-22 LPA","Python Machine Learning Data Analysis Statistics SQL"
+Machine Learning Engineer,Amazon,Hyderabad,"₹16-25 LPA","Python Machine Learning AWS TensorFlow SQL"
+Python Developer,TCS,Hyderabad,"₹5-8 LPA","Python Django Flask REST API SQL"
+Web Developer,Infosys,Pune,"₹4-7 LPA","HTML CSS JavaScript Bootstrap React Node.js"
+Cloud Engineer,Wipro,Chennai,"₹6-10 LPA","AWS Azure Docker Kubernetes Linux"
+Data Analyst,Deloitte,Hyderabad,"₹6-11 LPA","SQL Excel Power BI Python Statistics"
+AI Research Intern,NVIDIA,Bangalore,"₹12-18 LPA","Computer Vision Deep Learning PyTorch Research"
+Software Engineer,Accenture,Hyderabad,"₹6-12 LPA","Java Python SQL Git Data Structures"
+Full Stack Developer,Cognizant,Bangalore,"₹7-12 LPA","HTML CSS JavaScript React Node.js MongoDB"
