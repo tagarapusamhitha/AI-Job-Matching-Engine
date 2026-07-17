@@ -1204,11 +1204,6 @@ def profile():
         "profile.html",
         user=current_user
     )
-
-
-
-
-
 # ==============================
 # AI JOB MATCHING ROUTE
 # ==============================
@@ -1218,15 +1213,12 @@ def profile():
     "/match",
     methods=["POST"]
 )
-
 def match_jobs():
-
 
     skills_text = request.form.get(
         "skills",
         ""
     )
-
 
     role = request.form.get(
         "role",
@@ -1234,6 +1226,7 @@ def match_jobs():
     )
 
 
+    # Extract skills for AI matching
     skills = extract_user_skills(
         skills_text
         +
@@ -1251,7 +1244,6 @@ def match_jobs():
 
     for job in jobs:
 
-
         score = score_job(
             job,
             skills,
@@ -1260,7 +1252,6 @@ def match_jobs():
 
 
         if score > 0:
-
 
             results.append({
 
@@ -1272,37 +1263,36 @@ def match_jobs():
 
 
 
+    # Sort by highest match
     results = sorted(
-
         results,
-
-        key=lambda x:x["match_score"],
-
+        key=lambda x: x["match_score"],
         reverse=True
-
     )[:10]
 
 
 
+    # Dashboard Summary
     summary = {
 
-        "jobs_found":len(results),
+        "jobs_found":
+            len(results),
+
 
         "highest_match":
-
             results[0]["match_score"]
-
             if results
-
             else 0,
 
 
+        # FIXED LINE
+        "skills_entered":
+            skills_text,
+
+
         "recommended":
-
             results[0]["title"]
-
             if results
-
             else "No match"
 
     }
@@ -1318,11 +1308,6 @@ def match_jobs():
         summary=summary
 
     )
-
-
-
-
-
 # ==============================
 # SAVE / UNSAVE JOB
 # ==============================
