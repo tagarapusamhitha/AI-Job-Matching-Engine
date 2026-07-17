@@ -1,7 +1,4 @@
 {
-  "framework": "flask",
-  "buildCommand": "pip install -r requirements.txt",
-  {
   "version": 2,
   "builds": [
     {
@@ -15,10 +12,4 @@
       "dest": "api/app.py"
     }
   ]
-}
-  },
-  "env": {
-    "FLASK_ENV": "production",
-   "SECRET_KEY": "Samhitha_AI_Job_Matching_2026"
-  }
 }
