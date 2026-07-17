@@ -1,24 +1,39 @@
 from pathlib import Path
 import csv
 import re
+import sys
+import os
+import tempfile
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-import os
 
-app = Flask(__name__)
+# Initialize Flask App
+app = Flask(
+    __name__,
+    template_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates"),
+    static_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+)
+
+# Fix for Vercel
+app.instance_path = tempfile.gettempdir()
 
 # Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jobs.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
-db = SQLAlchemy(app)
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+db_path = os.path.join(tempfile.gettempdir(), "jobs.db")
 
-BASE_DIR = Path(__file__).resolve().parent
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-key-change-in-production")
+
+db = SQLAlchemy(app)
+
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 JOBS_FILE = BASE_DIR / "jobs.csv"
 
 # ==================== DATABASE MODELS ====================
@@ -678,9 +693,22 @@ def applications_stats():
 
 # ==================== MAIN ====================
 
+def initialize_database():
+    with app.app_context():
+        db.create_all()
+        import_jobs_from_csv()
+
+try:
+    initialize_database()
+except Exception as e:
+    print(f"Database initialization skipped: {e}")
+
 if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+
+
     with app.app_context():
         db.create_all()
         import_jobs_from_csv()
     
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PO
